@@ -1,3 +1,4 @@
-cp enabled/* ../horizon/openstack_dashboard/local/enabled/
+sudo python setup.py install
+cp trove_dashboard/enabled/* ../horizon/openstack_dashboard/local/enabled/
 cd ../horizon/;
-./collectstatics.sh
+./collectstatic.sh
