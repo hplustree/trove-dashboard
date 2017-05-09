@@ -14,6 +14,7 @@
 
 import binascii
 import logging
+import requests
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -49,7 +50,7 @@ class SetInstanceDetailsAction(workflows.Action):
     name = forms.CharField(max_length=80, label=_("Instance Name"))
     volume = forms.IntegerField(label=_("Volume Size"),
                                 min_value=0,
-                                initial=1,
+                                initial=10,
                                 help_text=_("Size of the volume in GB."))
     volume_type = forms.ChoiceField(
         label=_("Volume Type"),
@@ -62,6 +63,13 @@ class SetInstanceDetailsAction(workflows.Action):
             'class': 'switchable',
             'data-slug': 'datastore'
         }))
+
+    price_plan_type = forms.ChoiceField(
+            label=_("Price Plan Type"),
+            choices=[("MONTHLY", "MONTHLY"),
+                     ("HOURLY", "HOURLY")],
+            required=True,
+            help_text=_("Please select you pricing plan MONTHLY or HOURLY."))
 
     def __init__(self, request, *args, **kwargs):
         super(SetInstanceDetailsAction, self).__init__(request,
@@ -255,7 +263,7 @@ TROVE_ADD_PERMS = TROVE_ADD_USER_PERMS + TROVE_ADD_DATABASE_PERMS
 class SetInstanceDetails(workflows.Step):
     action_class = SetInstanceDetailsAction
     contributes = ("name", "volume", "volume_type", "flavor", "datastore",
-                   "locality", "availability_zone")
+                   "locality", "availability_zone", "price_plan_type")
 
 
 class AddDatabasesAction(workflows.Action):
@@ -561,7 +569,8 @@ class LaunchInstance(workflows.Workflow):
                      context.get('master'), context['replica_count'],
                      context.get('config'), self._get_locality(context),
                      avail_zone)
-            api.trove.instance_create(request,
+
+            instance = api.trove.instance_create(request,
                                       context['name'],
                                       context['volume'],
                                       context['flavor'],
@@ -578,6 +587,15 @@ class LaunchInstance(workflows.Workflow):
                                       configuration=context.get('config'),
                                       locality=self._get_locality(context),
                                       availability_zone=avail_zone)
+
+
+            main_website_url = getattr(settings, 'SITE_BRANDING_API_LINK', None)
+            requests.get(
+                main_website_url + "/ajax/dashboard-price-plan-mapping?db_instance_id=" + instance.id + "&price_plan_type=" + context['price_plan_type']).content;
+            LOG.error("fx test %s" % instance)
+            LOG.error("fx test %s" % context)
+
+
             return True
         except Exception:
             exceptions.handle(request)
