@@ -15,6 +15,7 @@
 import binascii
 import logging
 import requests
+from time import sleep
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -588,10 +589,14 @@ class LaunchInstance(workflows.Workflow):
                                       locality=self._get_locality(context),
                                       availability_zone=avail_zone)
 
-
-            main_website_url = getattr(settings, 'SITE_BRANDING_API_LINK', None)
-            requests.get(
+            response = 'false'
+            while(response=='false'):
+                sleep(1000)
+                main_website_url = getattr(settings, 'SITE_BRANDING_API_LINK', None)
+                response = requests.get(
                 main_website_url + "/ajax/dashboard-price-plan-mapping?db_instance_id=" + instance.id + "&price_plan_type=" + context['price_plan_type']).content;
+                LOG.error("fx test response %s" % response)
+
             LOG.error("fx test %s" % instance)
             LOG.error("fx test %s" % context)
 
