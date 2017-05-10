@@ -590,17 +590,17 @@ class LaunchInstance(workflows.Workflow):
                                       availability_zone=avail_zone)
 
             response = 'false'
-            while(response=='false'):
-                sleep(1000)
-                main_website_url = getattr(settings, 'SITE_BRANDING_API_LINK', None)
+            LOG.error("fx test initial response %s" % response )
+            main_website_url = getattr(settings, 'SITE_BRANDING_API_LINK', None)
+            LOG.error("fx test main website url %s" % main_website_url)
+            while response == 'false':
+                sleep(1)
                 response = requests.get(
                 main_website_url + "/ajax/dashboard-price-plan-mapping?db_instance_id=" + instance.id + "&price_plan_type=" + context['price_plan_type']).content;
                 LOG.error("fx test response %s" % response)
 
             LOG.error("fx test %s" % instance)
             LOG.error("fx test %s" % context)
-
-
             return True
         except Exception:
             exceptions.handle(request)
