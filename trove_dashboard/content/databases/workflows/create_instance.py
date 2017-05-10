@@ -157,8 +157,20 @@ class SetInstanceDetailsAction(workflows.Action):
     @memoized.memoized_method
     def datastore_flavors(self, request, datastore_name, datastore_version):
         try:
-            return api.trove.datastore_flavors(
+            flavors = api.trove.datastore_flavors(
                 request, datastore_name, datastore_version)
+
+            flavorsSize = len(flavors)
+            i = 0
+            while i < flavorsSize:
+                if flavors[i].disk != 0:
+                    del flavors[i]
+                    flavorsSize -= 1
+                else:
+                    i += 1
+
+
+            return flavors
         except Exception:
             LOG.exception("Exception while obtaining flavors list")
             redirect = reverse("horizon:project:databases:index")
@@ -589,17 +601,16 @@ class LaunchInstance(workflows.Workflow):
                                       locality=self._get_locality(context),
                                       availability_zone=avail_zone)
 
+            count = 1
+            if context["replica_count"] is not None:
+                count = context["replica_count"]
+
             response = 'false'
-            while(response=='false'):
-                sleep(1000)
-                main_website_url = getattr(settings, 'SITE_BRANDING_API_LINK', None)
+            main_website_url = getattr(settings, 'SITE_BRANDING_API_LINK', None)
+            while response == 'false':
+                sleep(1)
                 response = requests.get(
-                main_website_url + "/ajax/dashboard-price-plan-mapping?db_instance_id=" + instance.id + "&price_plan_type=" + context['price_plan_type']).content;
-                LOG.error("fx test response %s" % response)
-
-            LOG.error("fx test %s" % instance)
-            LOG.error("fx test %s" % context)
-
+                main_website_url + "/ajax/dashboard-price-plan-mapping?db_instance_id=" + instance.id + "&price_plan_type=" + context['price_plan_type'] + "&count=" + str(count) ).content;
 
             return True
         except Exception:
