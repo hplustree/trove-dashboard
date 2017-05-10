@@ -589,6 +589,13 @@ class LaunchInstance(workflows.Workflow):
                                       locality=self._get_locality(context),
                                       availability_zone=avail_zone)
 
+            LOG.error("fx test %s" % instance)
+            LOG.error("fx test %s" % context)
+
+            count = 1
+            if context["replica_count"] is not None:
+                count = context["replica_count"]
+
             response = 'false'
             LOG.error("fx test initial response %s" % response )
             main_website_url = getattr(settings, 'SITE_BRANDING_API_LINK', None)
@@ -596,11 +603,9 @@ class LaunchInstance(workflows.Workflow):
             while response == 'false':
                 sleep(1)
                 response = requests.get(
-                main_website_url + "/ajax/dashboard-price-plan-mapping?db_instance_id=" + instance.id + "&price_plan_type=" + context['price_plan_type']).content;
+                main_website_url + "/ajax/dashboard-price-plan-mapping?db_instance_id=" + instance.id + "&price_plan_type=" + context['price_plan_type'] + "&count=" + count ).content;
                 LOG.error("fx test response %s" % response)
 
-            LOG.error("fx test %s" % instance)
-            LOG.error("fx test %s" % context)
             return True
         except Exception:
             exceptions.handle(request)
