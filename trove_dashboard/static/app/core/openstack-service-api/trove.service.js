@@ -33,6 +33,7 @@
   ];
 
   function TroveAPI(apiService, toastService) {
+    alert('hello');
     var service = {
       getBackups: getBackups
     };

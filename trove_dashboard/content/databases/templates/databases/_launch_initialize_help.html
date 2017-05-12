@@ -2,12 +2,14 @@
 
 <h4>{% trans "Initial Databases" %}</h4>
 <p>{% trans "Optionally provide a comma separated list of databases to create:" %}</p>
-<pre>database1, database2, database3</pre>
+<pre class="nomongo">database1, database2, database3</pre>
+<pre class="mongo hide">database1</pre>
 
 <h4>{% trans "Initial Admin User" %}</h4>
 <p>{% blocktrans %}Create an optional initial user.
    This user will have access to all databases you create.{% endblocktrans %}</p>
-
+    <p class="mongo hide">Username format should be</p>
+    <pre class="mongo hide"> &lt;database name&gt;.&lt;username&gt; </pre>
 <ul>
   <li><strong>{% trans "Username (required)" %}</strong></li>
   <li><strong>{% trans "Password (required)" %}</strong></li>

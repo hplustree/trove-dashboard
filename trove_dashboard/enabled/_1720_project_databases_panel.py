@@ -29,3 +29,6 @@ ADD_EXCEPTIONS = {
     'recoverable': exceptions.RECOVERABLE,
     'unauthorized': exceptions.UNAUTHORIZED
 }
+ADD_JS_FILES = [
+    'app/core/openstack-service-api/trove.manage.js'
+]

@@ -52,6 +52,7 @@ class SetInstanceDetailsAction(workflows.Action):
     volume = forms.IntegerField(label=_("Volume Size"),
                                 min_value=0,
                                 initial=10,
+                                max_value=10240,
                                 help_text=_("Size of the volume in GB."))
     volume_type = forms.ChoiceField(
         label=_("Volume Type"),
@@ -208,7 +209,10 @@ class SetInstanceDetailsAction(workflows.Action):
     def populate_datastore_choices(self, request, context):
         choices = ()
         datastores = self.datastores(request)
+
         if datastores is not None:
+            datastores.sort(key=lambda d: d.name)
+
             for ds in datastores:
                 versions = self.datastore_versions(request, ds.name)
                 if versions:
@@ -242,7 +246,7 @@ class SetInstanceDetailsAction(workflows.Action):
             help_text=_("Size of image to launch."),
             required=False,
             widget=forms.Select(attrs={
-                'class': 'switched',
+                'class': 'switched flavor-select',
                 'data-switch-on': 'datastore',
                 attr_key: _("Flavor")
             }))
@@ -290,12 +294,19 @@ class AddDatabasesAction(workflows.Action):
                                 required=False,
                                 help_text=_('Comma separated list of '
                                             'databases to create'))
+    fakeuser = forms.CharField(label=_('Initial Admin User'),
+                           required=False,
+                           help_text=_("Initial admin user to add"))
     user = forms.CharField(label=_('Initial Admin User'),
                            required=False,
                            help_text=_("Initial admin user to add"))
+    fakepassword = forms.CharField(widget=forms.PasswordInput(),
+                                   label=_("Password"),
+                                   required=False)
     password = forms.CharField(widget=forms.PasswordInput(),
                                label=_("Password"),
                                required=False)
+
     host = forms.CharField(label=_("Allowed Host (optional)"),
                            required=False,
                            help_text=_("Host or IP that the user is allowed "

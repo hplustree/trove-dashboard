@@ -1,4 +1,45 @@
-{% load i18n %}
+{% load i18n horizon humanize bootstrap %}
 
-<p>{% blocktrans %}Specify the details for launching an instance.{% endblocktrans %}</p>
-<p>{% blocktrans %}<strong>Please note:</strong> The value specified in the Volume Size field should be greater than 0, however, some configurations do not support specifying volume size. If specifying the volume size results in an error stating volume support is not enabled, enter 0.{% endblocktrans %}</p>
+{% block help_message %}
+    <p>{% blocktrans %}Specify the details for launching an instance.{% endblocktrans %}</p>
+    <p>{% blocktrans %}<strong>Please note:</strong> The value specified in the Volume Size field should be greater than 0, however, some configurations do not support specifying volume size. If specifying the volume size results in an error stating volume support is not enabled, enter 0.{% endblocktrans %}</p>
+
+{% endblock %}
+<div class="datastore-info-container">
+    <div class="alert alert-info"></div>
+</div>
+<h4>{% trans "Flavor Details" %}</h4>
+<table class="flavor_table table table-striped table-fixed">
+  <tbody>
+    <tr><td class="flavor_name">{% trans "Name" %}</td><td><span id="flavor_name" class="truncate"></span></td></tr>
+    <tr><td class="flavor_name">{% trans "VCPUs" %}</td><td><span id="flavor_vcpus"></span></td></tr>
+    <tr><td class="flavor_name">{% trans "RAM" %}</td><td><span id="flavor_ram"></span> {% trans "MB" %}</td></tr>
+    <tr><td class="flavor_name">{% trans "Root Disk" %}</td><td><span id="flavor_disk"></span> {% trans "GB" %}</td></tr>
+    <tr><td class="flavor_name">Network</td><td><span id="flavor_network"></span> {% trans "TB" %} per month</td></tr>
+    <tr><td class="flavor_name">Disk Price</td><td><span id="flavor_disk_price"></span></td></tr>
+    <tr><td class="flavor_name">Flavor Price</td><td><span id="flavor_flavor_price"></span></td></tr>
+  </tbody>
+</table>
+
+
+<script type="text/javascript" charset="utf-8">
+  some_disabled_msg = '{{_("Some flavors not meeting minimum boot source requirements have been disabled.")|escapejs }}';
+  all_disabled_msg = '{{_("No flavors meet minimum criteria for selected boot source.")|escapejs }}';
+
+  if(typeof horizon.Quota !== 'undefined') {
+    horizon.Quota.initWithFlavors({{ flavors|safe|default:"{}" }});
+    horizon.Quota.initWithImages({{ images|safe|default:"{}"}}, some_disabled_msg, all_disabled_msg);
+  } else {
+    addHorizonLoadEvent(function() {
+      horizon.Quota.initWithFlavors({{ flavors|safe|default:"{}" }});
+      horizon.Quota.initWithImages({{ images|safe|default:"{}"}}, some_disabled_msg, all_disabled_msg);
+    });
+  }
+</script>
+
+
+<script>
+    $(document).ready(function () {
+        TroveManageController();
+    });
+</script>
